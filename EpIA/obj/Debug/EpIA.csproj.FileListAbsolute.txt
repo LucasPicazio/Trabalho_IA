@@ -1,0 +1,10 @@
+C:\Users\Administrador\source\repos\EpIA\EpIA\bin\Debug\EpIA.exe.config
+C:\Users\Administrador\source\repos\EpIA\EpIA\bin\Debug\EpIA.exe
+C:\Users\Administrador\source\repos\EpIA\EpIA\bin\Debug\EpIA.pdb
+C:\Users\Administrador\source\repos\EpIA\EpIA\obj\Debug\EpIA.csprojAssemblyReference.cache
+C:\Users\Administrador\source\repos\EpIA\EpIA\obj\Debug\EpIA.Form1.resources
+C:\Users\Administrador\source\repos\EpIA\EpIA\obj\Debug\EpIA.Properties.Resources.resources
+C:\Users\Administrador\source\repos\EpIA\EpIA\obj\Debug\EpIA.csproj.GenerateResource.cache
+C:\Users\Administrador\source\repos\EpIA\EpIA\obj\Debug\EpIA.csproj.CoreCompileInputs.cache
+C:\Users\Administrador\source\repos\EpIA\EpIA\obj\Debug\EpIA.exe
+C:\Users\Administrador\source\repos\EpIA\EpIA\obj\Debug\EpIA.pdb
