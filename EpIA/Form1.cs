@@ -115,7 +115,7 @@ namespace EpIA
              
                 bintodec(lineString);
                 
-                Rodar();
+                
                 Console.WriteLine("Fitnes {0}: {1}", i + 1, fitness);
 
             var result1 = 20 + Math.Pow(x, 2) + Math.Pow(y, 2) - 10 * (Math.Cos(2 * Math.PI * x) + Math.Cos(2 * Math.PI * y));
