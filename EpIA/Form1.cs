@@ -20,6 +20,9 @@ namespace EpIA
 
         double fitness;
 
+        List<String> selecionadaosx;
+        List<String> selecionadaosy;
+
 
 
 
@@ -106,16 +109,33 @@ namespace EpIA
                     }
                 }
                 dataGridView1.DataSource = dt;
-                'SelecaoTorneio();
+                SelecaoTorneio(); // Seleciona da table e coloca nos selecionados
+                CrossOver(); // Faz crossover dos selecionados
+                Mutacao(); // Muta os selecionados
+                SelecionadostoTable(); // Insere dnv na table e faz copia para historico
+            }
+        }
 
-                }
+        private void SelecionadostoTable()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void Mutacao()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void CrossOver()
+        {
+            throw new NotImplementedException();
         }
 
         private void SelecaoTorneio()
         {
-            var selecionadaosx = new List<String>();
-            var selecionadaosy = new List<String>();
-            do
+            selecionadaosx = new List<String>();
+            selecionadaosy = new List<String>();
+            while (selecionadaosx.Count < 4 || selecionadaosy.Count < 4)
             {
                 var rand = new Random();
                 var sorteadosx = new List<String>();
@@ -127,23 +147,67 @@ namespace EpIA
                     sorteadosx.Add((string)dt.Rows[sorteadox]["fitness"]);
                     sorteadosy.Add((string)dt.Rows[sorteadoy]["fitness"]);
                 }
+                if (!selecionadaosx.Contains(sorteadosx.Max()) && selecionadaosx.Count < 4)
+                {
+                    selecionadaosx.Add(sorteadosx.Max());
+                }
 
-                selecionadaosx.Add(sorteadosx.Max());
-                selecionadaosy.Add(sorteadosy.Max());
+                if (!selecionadaosy.Contains(sorteadosy.Max()) && selecionadaosy.Count < 4)
+                {
+                    selecionadaosy.Add(sorteadosy.Max());
+                }
 
-            } while (selecionadaosx.Count < 5 && selecionadaosy.Count < 5 );
+            } 
 
+            LimpaCor();
+            PintaSelecionados();
+            
+        }
+
+        private void LimpaCor()
+        {
+            dataGridView1.SelectAll();
+            var cells = dataGridView1.SelectedCells;
+            foreach (DataGridViewCell cell in cells)
+            {
+                cell.Style.BackColor = Color.White;
+            }
+            dataGridView1.ClearSelection();
+        }
+
+        private void PintaSelecionados()
+        {
+            #region Pinta X
             foreach (string selecionado in selecionadaosx)
             {
                 foreach (DataGridViewRow row in dataGridView1.Rows)
                 {
-                    if (row.Cells[0].Value.ToString() == selecionado)
+                    if (row.Cells["fitness"].Value != null)
                     {
-                        row.Cells[0].Style.BackColor = Color.Blue;
+                        if (row.Cells["fitness"].Value.ToString() == selecionado)
+                        {
+                            row.Cells[0].Style.BackColor = Color.Blue;
+                        }
                     }
                 }
-               
             }
+            #endregion
+            #region Pinta Y
+            foreach (string selecionado in selecionadaosy)
+            {
+                foreach (DataGridViewRow row in dataGridView1.Rows)
+                {
+                    if (row.Cells["fitness"].Value != null)
+                    {
+                        if (row.Cells["fitness"].Value.ToString() == selecionado)
+                        {
+                            row.Cells[1].Style.BackColor = Color.Blue;
+                        }
+                    }
+                }
+            }
+        #endregion
+
         }
 
         private void bintodec(string xString, string yString)
