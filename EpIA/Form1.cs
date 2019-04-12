@@ -14,26 +14,13 @@ namespace EpIA
 	{
 
         DataTable dt = new DataTable();
-		int[,] popini  = new int[10,20]{
-				{0,0,0,0,0,1,0,1,1,0,0,0,1,1,1,0,1,1,1,0},
-				{1,0,0,0,0,0,1,1,0,0,1,0,1,0,1,1,1,1,1,0},
-				{0,1,0,1,0,0,0,0,0,1,0,1,0,1,1,0,1,1,1,1},
-				{0,1,1,1,1,1,0,0,0,1,0,1,1,1,0,0,0,1,0,0},
-				{1,0,1,1,1,1,0,0,0,0,0,1,1,1,0,1,0,1,0,1},
-				{0,1,0,0,0,1,0,0,1,0,1,0,1,0,0,1,0,1,1,1},
-				{1,1,0,1,1,0,1,0,1,1,0,0,0,0,0,1,0,1,1,1},
-				{0,1,0,1,1,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0},
-				{1,0,0,1,1,1,0,0,1,0,0,1,1,0,1,1,1,0,1,1},
-				{0,0,1,1,0,0,1,1,1,0,1,0,1,0,1,1,0,0,1,1}
-		 };
-		double x;
+        DataRow dr;
+        double x;
 		double y;
 
         double fitness;
 
-        string lineString;
 
-        DataRow dr;
 
 
         public Form1()
@@ -45,47 +32,123 @@ namespace EpIA
             decx.DataType = typeof(double);
             DataColumn decy = new DataColumn("decy");
             decy.DataType = typeof(double);
-            DataColumn resultx = new DataColumn("resultx");
-            DataColumn resulty = new DataColumn("resulty");
-            DataColumn fitnessx = new DataColumn("fitnessx");
-            DataColumn fitnessy = new DataColumn("fitnessy");
-            DataColumn sum = new DataColumn("sum");
+            DataColumn result = new DataColumn("result");
+            DataColumn fitness = new DataColumn("fitness");
+            DataColumn Chance = new DataColumn("Chance");
             dt.Columns.Add(binx);
             dt.Columns.Add(biny);
             dt.Columns.Add(decx);
             dt.Columns.Add(decy);
-            dt.Columns.Add(resultx);
-            dt.Columns.Add(resulty);
-            dt.Columns.Add(fitnessx);
-            dt.Columns.Add(fitnessy);
-            dt.Columns.Add(sum);
+            dt.Columns.Add(result);
+            dt.Columns.Add(fitness);
 
+            #region População inicial
+            dr = dt.NewRow();
+            dr["binx"] = "0000010110";
+            dr["biny"] = "0011101110";
+            dt.Rows.Add(dr);
+            dr = dt.NewRow();
+            dr["binx"] = "1000001100";
+            dr["biny"] = "1010111110";
+            dt.Rows.Add(dr);
+            dr = dt.NewRow();
+            dr["binx"] = "0101000001";
+            dr["biny"] = "0101101111";
+            dt.Rows.Add(dr);
+            dr = dt.NewRow();
+            dr["binx"] = "0111110001";
+            dr["biny"] = "0111000100";
+            dt.Rows.Add(dr);
+            dr = dt.NewRow();
+            dr["binx"] = "1011110000";
+            dr["biny"] = "0111010101";
+            dt.Rows.Add(dr);
+            dr = dt.NewRow();
+            dr["binx"] = "0100010010";
+            dr["biny"] = "1010010111";
+            dt.Rows.Add(dr);
+            dr = dt.NewRow();
+            dr["binx"] = "1101101011";
+            dr["biny"] = "0000010111";
+            dt.Rows.Add(dr);
+            dr = dt.NewRow();
+            dr["binx"] = "0101100000";
+            dr["biny"] = "1101100000";
+            dt.Rows.Add(dr);
+            dr = dt.NewRow();
+            dr["binx"] = "1001110010";
+            dr["biny"] = "0110111011";
+            dt.Rows.Add(dr);
+            dr = dt.NewRow();
+            dr["binx"] = "0011001110";
+            dr["biny"] = "1010110011";
+            dt.Rows.Add(dr);
+
+            #endregion
 
         }
 
         private void Button1_Click(object sender, EventArgs e)
 		{
-            
-            Rodar();
-           Selecao();
+            int Geracoes = 1;
+            for (int i = 0; i < Geracoes; i++)
+            {
+                if (i == 0) // Le da matriz apenas na primeira vez
+                {
+                    for (int j = 0; j < 10; j++)
+                    {
+                        dr = dt.Rows[j];
+                        string xString = (string)dr["binx"];
+                        string yString = (string)dr["biny"];
+                        bintodec(xString, yString);
+                        Rodar_e_fitness();
+                        
+                    }
+                }
+                dataGridView1.DataSource = dt;
+                'SelecaoTorneio();
 
+                }
         }
 
-        private void Selecao()
+        private void SelecaoTorneio()
         {
-            throw new NotImplementedException();
+            var selecionadaosx = new List<String>();
+            var selecionadaosy = new List<String>();
+            do
+            {
+                var rand = new Random();
+                var sorteadosx = new List<String>();
+                var sorteadosy = new List<String>();
+                for (int i = 0; i < 3; i++)
+                {
+                    int sorteadox = rand.Next(0, 9);
+                    int sorteadoy = rand.Next(0, 9);
+                    sorteadosx.Add((string)dt.Rows[sorteadox]["fitness"]);
+                    sorteadosy.Add((string)dt.Rows[sorteadoy]["fitness"]);
+                }
+
+                selecionadaosx.Add(sorteadosx.Max());
+                selecionadaosy.Add(sorteadosy.Max());
+
+            } while (selecionadaosx.Count < 5 && selecionadaosy.Count < 5 );
+
+            foreach (string selecionado in selecionadaosx)
+            {
+                foreach (DataGridViewRow row in dataGridView1.Rows)
+                {
+                    if (row.Cells[0].Value.ToString() == selecionado)
+                    {
+                        row.Cells[0].Style.BackColor = Color.Blue;
+                    }
+                }
+               
+            }
         }
 
-        private void bintodec(string line)
+        private void bintodec(string xString, string yString)
 		{
 			
-			
-			
-            
-			string xString = line.Substring(0,10);
-			string yString = line.Substring(10, 10);
-            dr["binx"] = xString;
-            dr["biny"] = yString;
             x = Convert.ToInt32(xString,2);
 			y = Convert.ToInt32(yString, 2);
 
@@ -102,25 +165,14 @@ namespace EpIA
 
         }
 
-        private void Rodar()
+        private void Rodar_e_fitness()
         {
-            for (int i = 0; i < 10; i++)
-            {
+            
+                var result = 20 + Math.Pow(x, 2) + Math.Pow(y, 2) - 10 * (Math.Cos(2 * Math.PI * x) + Math.Cos(2 * Math.PI * y));
+                fitness = 1 / result;
+                dr["fitness"] = fitness;
+                dr["result"] = result;
                 
-                var line = popini.Cast<int>().Skip(i * 20).Take(20).ToArray(); // pega cada linha da matriz
-                string lineString = string.Join("",line); // array to string
-
-                dr = dt.NewRow();
-                
-             
-                bintodec(lineString);
-                
-                
-                Console.WriteLine("Fitnes {0}: {1}", i + 1, fitness);
-
-            var result1 = 20 + Math.Pow(x, 2) + Math.Pow(y, 2) - 10 * (Math.Cos(2 * Math.PI * x) + Math.Cos(2 * Math.PI * y));
-            fitness = 1 / result1;
-            }
         }
     }
 }
