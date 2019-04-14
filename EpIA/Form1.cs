@@ -22,6 +22,8 @@ namespace EpIA
 
         List<String> selecionadaosx;
         List<String> selecionadaosy;
+	List<String> filhos1;
+        List<String> filhos2;
 
 
 
@@ -128,7 +130,30 @@ namespace EpIA
 
         private void CrossOver()
         {
-            throw new NotImplementedException();
+            filhos1 = new List<String>();
+            filhos2 = new List<String>();
+
+            int chanceCruzamento = 70;
+            var rand = new Random();
+
+            for (int i = 0; i < 5; i++)
+            {
+                int cruza = rand.Next(1, 100);
+
+                if (cruza < chanceCruzamento)
+                {
+                    int pontoDivisao = rand.Next(1, 19);
+
+                    string parte_x1 = selecionadaosx[i].Substring(0, pontoDivisao);
+                    string parte_y1 = selecionadaosx[i].Substring(pontoDivisao, 20 - pontoDivisao);
+
+                    string parte_x2 = selecionadaosy[i].Substring(0, pontoDivisao);
+                    string parte_y2 = selecionadaosy[i].Substring(pontoDivisao, 20 - pontoDivisao);
+
+                    filhos1[i] = parte_x1 + parte_y2;
+                    filhos2[i] = parte_x2 + parte_y1;
+                }
+            }
         }
 
         private void SelecaoTorneio()
