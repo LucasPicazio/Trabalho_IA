@@ -135,7 +135,7 @@ namespace EpIA
         {
             selecionadaosx = new List<String>();
             selecionadaosy = new List<String>();
-            while (selecionadaosx.Count < 4 || selecionadaosy.Count < 4)
+            while (selecionadaosx.Count < 5 || selecionadaosy.Count < 5)
             {
                 var rand = new Random();
                 var sorteadosx = new List<String>();
@@ -147,12 +147,12 @@ namespace EpIA
                     sorteadosx.Add((string)dt.Rows[sorteadox]["fitness"]);
                     sorteadosy.Add((string)dt.Rows[sorteadoy]["fitness"]);
                 }
-                if (!selecionadaosx.Contains(sorteadosx.Max()) && selecionadaosx.Count < 4)
+                if (!selecionadaosx.Contains(sorteadosx.Max()) && selecionadaosx.Count < 5)
                 {
                     selecionadaosx.Add(sorteadosx.Max());
                 }
 
-                if (!selecionadaosy.Contains(sorteadosy.Max()) && selecionadaosy.Count < 4)
+                if (!selecionadaosy.Contains(sorteadosy.Max()) && selecionadaosy.Count < 5)
                 {
                     selecionadaosy.Add(sorteadosy.Max());
                 }
