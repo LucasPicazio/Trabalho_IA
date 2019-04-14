@@ -153,6 +153,11 @@ namespace EpIA
                     filhos1[i] = parte_x1 + parte_y2;
                     filhos2[i] = parte_x2 + parte_y1;
                 }
+		else
+                {
+                    filhos1[i] = selecionadaosx[i];
+                    filhos2[i] = selecionadaosy[i];
+                }
             }
         }
 
