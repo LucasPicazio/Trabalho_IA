@@ -19,14 +19,14 @@ namespace EpIA
 		double y;
 
         double fitness;
+        double probabilidadeMutacao = 5;
+        double mediafitness;
 
         List<String> selecionadaosx;
         List<String> selecionadaosy;
-	List<String> filhos1;
+	    List<String> filhos1;
         List<String> filhos2;
-
-
-
+        private int countMutacao = 0;
 
         public Form1()
 		{
@@ -114,18 +114,62 @@ namespace EpIA
                 SelecaoTorneio(); // Seleciona da table e coloca nos selecionados
                 CrossOver(); // Faz crossover dos selecionados
                 Mutacao(); // Muta os selecionados
-                SelecionadostoTable(); // Insere dnv na table e faz copia para historico
+                MediaFitness();
             }
         }
 
-        private void SelecionadostoTable()
+        private void MediaFitness()
         {
-            throw new NotImplementedException();
+            var soma = dt.AsEnumerable().Select(r => r.Field<int>("Fitness")).ToList().Sum<double>();
+            mediafitness = 
         }
 
         private void Mutacao()
         {
-            throw new NotImplementedException();
+
+            for (int i = 0; i < selecionadaosx.Count; i++)
+            {
+                Random rand = new Random();
+                if (rand.Next(0,10000) < probabilidadeMutacao )
+                {
+                    countMutacao++;
+                    var cromossomoarray = selecionadaosx[i].ToCharArray();
+                    int sorteado = rand.Next(0, 4);
+
+                    if (selecionadaosx[i][sorteado] == '1')
+                    {
+                        cromossomoarray[sorteado] = '0';
+                    }
+                    else
+                    {
+                        cromossomoarray[sorteado] = '1';
+                    }
+
+                    selecionadaosx.RemoveAt(i);
+                    selecionadaosx.Add(cromossomoarray.ToString());
+                }
+            }
+            for (int i = 0; i < selecionadaosy.Count; i++)
+            {
+                Random rand = new Random();
+                if (rand.Next(0, 100) < probabilidadeMutacao)
+                {
+                    var cromossomoarray = selecionadaosy[i].ToCharArray();
+                    int sorteado = rand.Next(0, 4);
+
+                    if (selecionadaosy[i][sorteado] == '1')
+                    {
+                        cromossomoarray[sorteado] = '0';
+                    }
+                    else
+                    {
+                        cromossomoarray[sorteado] = '1';
+                    }
+
+                    selecionadaosy.RemoveAt(i);
+                    selecionadaosy.Add(cromossomoarray.ToString());
+                }
+            }
         }
 
         private void CrossOver()
@@ -251,9 +295,7 @@ namespace EpIA
 
 			x = Math.Round(x, 2);
 			y = Math.Round(y, 2);
-
-            dr["decx"] = x;
-            dr["decy"] = y;
+            
 
 
 
@@ -265,7 +307,6 @@ namespace EpIA
                 var result = 20 + Math.Pow(x, 2) + Math.Pow(y, 2) - 10 * (Math.Cos(2 * Math.PI * x) + Math.Cos(2 * Math.PI * y));
                 fitness = 1 / result;
                 dr["fitness"] = fitness;
-                dr["result"] = result;
                 
         }
     }
