@@ -7,12 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace EpIA
 {
 	public partial class Form1 : Form
 	{
-
+        DataTable chartdt = new DataTable();
         DataTable dt = new DataTable();
         DataRow dr;
         double x;
@@ -27,25 +28,26 @@ namespace EpIA
 	    List<String> filhos1;
         List<String> filhos2;
         private int countMutacao = 0;
+        private double melhor;
 
         public Form1()
 		{
+
 			InitializeComponent();
-            DataColumn binx = new DataColumn("binx");
+            DataColumn binx = new DataColumn("binx");//TODO: Mudar de dt para Lista
             DataColumn biny = new DataColumn("biny");
-            DataColumn decx = new DataColumn("decx");
-            decx.DataType = typeof(double);
-            DataColumn decy = new DataColumn("decy");
-            decy.DataType = typeof(double);
-            DataColumn result = new DataColumn("result");
             DataColumn fitness = new DataColumn("fitness");
-            DataColumn Chance = new DataColumn("Chance");
             dt.Columns.Add(binx);
             dt.Columns.Add(biny);
-            dt.Columns.Add(decx);
-            dt.Columns.Add(decy);
-            dt.Columns.Add(result);
             dt.Columns.Add(fitness);
+
+            DataColumn generation = new DataColumn("generation");//TODO: Mudar de dt para Lista
+            DataColumn max = new DataColumn("max");
+            DataColumn fitness2 = new DataColumn("fitness");
+            chartdt.Columns.Add(generation);
+            chartdt.Columns.Add(max);
+            chartdt.Columns.Add(fitness2);
+
 
             #region População inicial
             dr = dt.NewRow();
@@ -98,6 +100,8 @@ namespace EpIA
             int Geracoes = 1;
             for (int i = 0; i < Geracoes; i++)
             {
+                DataRow row = chartdt.NewRow();
+                row["generation"] = i;
                 if (i == 0) // Le da matriz apenas na primeira vez
                 {
                     for (int j = 0; j < 10; j++)
@@ -110,18 +114,31 @@ namespace EpIA
                         
                     }
                 }
-                dataGridView1.DataSource = dt;
+                
                 SelecaoTorneio(); // Seleciona da table e coloca nos selecionados
                 CrossOver(); // Faz crossover dos selecionados
                 Mutacao(); // Muta os selecionados
                 MediaFitness();
+                row["fitness"] = mediafitness;
+                Melhor();
+                row["max"] = melhor;
+                chartdt.Rows.Add(row);
+                chart1.DataSource = chartdt;
+                chart1.Series["Series1"].XValueMember = "genaration";
+                chart1.Series["Series1"].YValueMembers = "fitness";
+                chart1.Series["Series1"].ChartType = SeriesChartType.Line;
             }
+        }
+
+        private void Melhor()
+        {
+            melhor = dt.AsEnumerable().Select(r => r.Field<double>("Fitness")).Max();
         }
 
         private void MediaFitness()
         {
-            var soma = dt.AsEnumerable().Select(r => r.Field<int>("Fitness")).ToList().Sum<double>();
-            mediafitness = 
+            double soma = dt.AsEnumerable().Select(r => r.Field<double>("Fitness")).Sum();
+            mediafitness = soma / 10;
         }
 
         private void Mutacao()
@@ -233,56 +250,10 @@ namespace EpIA
 
             } 
 
-            LimpaCor();
-            PintaSelecionados();
-            
+           
         }
 
-        private void LimpaCor()
-        {
-            dataGridView1.SelectAll();
-            var cells = dataGridView1.SelectedCells;
-            foreach (DataGridViewCell cell in cells)
-            {
-                cell.Style.BackColor = Color.White;
-            }
-            dataGridView1.ClearSelection();
-        }
-
-        private void PintaSelecionados()
-        {
-            #region Pinta X
-            foreach (string selecionado in selecionadaosx)
-            {
-                foreach (DataGridViewRow row in dataGridView1.Rows)
-                {
-                    if (row.Cells["fitness"].Value != null)
-                    {
-                        if (row.Cells["fitness"].Value.ToString() == selecionado)
-                        {
-                            row.Cells[0].Style.BackColor = Color.Blue;
-                        }
-                    }
-                }
-            }
-            #endregion
-            #region Pinta Y
-            foreach (string selecionado in selecionadaosy)
-            {
-                foreach (DataGridViewRow row in dataGridView1.Rows)
-                {
-                    if (row.Cells["fitness"].Value != null)
-                    {
-                        if (row.Cells["fitness"].Value.ToString() == selecionado)
-                        {
-                            row.Cells[1].Style.BackColor = Color.Blue;
-                        }
-                    }
-                }
-            }
-        #endregion
-
-        }
+        
 
         private void bintodec(string xString, string yString)
 		{
