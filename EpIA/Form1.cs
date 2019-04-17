@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
 namespace EpIA
 {
-	public partial class Form1 : Form
+    public partial class Form1 : Form
 	{
         DataTable chartdt = new DataTable();
         DataTable dt = new DataTable();
@@ -25,8 +22,7 @@ namespace EpIA
 
         DataRow[] selecionadaosx;
         DataRow[] selecionadaosy;
-	    List<String> filhos1;
-        List<String> filhos2;
+
         private int countMutacao = 0;
         private double melhor;
 
@@ -43,6 +39,7 @@ namespace EpIA
             dt.Columns.Add(binx);
             dt.Columns.Add(biny);
             dt.Columns.Add(fitness);
+            dt.Columns.Add(selecionadox);
             dt.Columns.Add(selecionadoy);
 
             DataColumn generation = new DataColumn("generation");//TODO: Mudar de dt para Lista
@@ -101,23 +98,27 @@ namespace EpIA
         }
 
         private void Button1_Click(object sender, EventArgs e)
-		{
-            int Geracoes = 1;
+        {
+            chart1.Series["Series1"].XValueMember = "generation";
+            chart1.Series["Series1"].YValueMembers = "fitness";
+            chart1.Series["Series1"].ChartType = SeriesChartType.Line;
+
+            int Geracoes = 20000;
             for (int i = 0; i < Geracoes; i++)
             {
                 DataRow row = chartdt.NewRow();
                 row["generation"] = i;
 
-                    for (int j = 0; j < 10; j++)
-                    {
-                        dr = dt.Rows[j];
-                        string xString = (string)dr["binx"];
-                        string yString = (string)dr["biny"];
-                        bintodec(xString, yString);
-                        Rodar_e_fitness();
-                    }
-                
-                
+                for (int j = 0; j < 10; j++)
+                {
+                    dr = dt.Rows[j];
+                    string xString = (string)dr["binx"];
+                    string yString = (string)dr["biny"];
+                    bintodec(xString, yString);
+                    Rodar_e_fitness();
+                }
+
+
                 SelecaoTorneio(); // Seleciona da table e coloca nos selecionados
                 CrossOver(); // Faz crossover dos selecionados
                 Mutacao(); // Muta os selecionados
@@ -127,13 +128,12 @@ namespace EpIA
                 row["max"] = melhor;
                 chartdt.Rows.Add(row);
                 ListtoDataTable();
+
                 dataGridView2.DataSource = dt;
+
+                chart1.DataSource = chartdt;
+                dataGridView1.DataSource = chartdt;
             }
-            chart1.DataSource = chartdt;
-            chart1.Series["Series1"].XValueMember = "generation";
-            chart1.Series["Series1"].YValueMembers = "fitness";
-            chart1.Series["Series1"].ChartType = SeriesChartType.Line;
-            dataGridView1.DataSource = chartdt;
         }
 
         private void ListtoDataTable()
@@ -158,16 +158,16 @@ namespace EpIA
         private void Mutacao()
         {
 
-            for (int i = 0; i < selecionadaosx.Count; i++)
+            for (int i = 0; i < selecionadaosx.Count(); i++)
             {
                 Random rand = new Random();
-                if (rand.Next(0,10000) < probabilidadeMutacao )
+                if (rand.Next(0,100) < probabilidadeMutacao )
                 {
                     countMutacao++;
-                    var cromossomoarray = selecionadaosx[i].ToCharArray();
+                    var cromossomoarray = selecionadaosx[i]["binx"].ToString().ToCharArray();
                     int sorteado = rand.Next(0, 4);
 
-                    if (selecionadaosx[i][sorteado] == '1')
+                    if (cromossomoarray[sorteado] == '1')
                     {
                         cromossomoarray[sorteado] = '0';
                     }
@@ -176,19 +176,18 @@ namespace EpIA
                         cromossomoarray[sorteado] = '1';
                     }
 
-                    selecionadaosx.RemoveAt(i);
-                    selecionadaosx.Add(cromossomoarray.ToString());
-                }
+                    selecionadaosx[i]["binx"] = new string(cromossomoarray);
+                    }
             }
-            for (int i = 0; i < selecionadaosy.Count; i++)
+            for (int i = 0; i < selecionadaosy.Count(); i++)
             {
                 Random rand = new Random();
                 if (rand.Next(0, 100) < probabilidadeMutacao)
                 {
-                    var cromossomoarray = selecionadaosy[i].ToCharArray();
+                    var cromossomoarray = selecionadaosy[i]["biny"].ToString().ToCharArray();
                     int sorteado = rand.Next(0, 4);
 
-                    if (selecionadaosy[i][sorteado] == '1')
+                    if (cromossomoarray[sorteado] == '1')
                     {
                         cromossomoarray[sorteado] = '0';
                     }
@@ -197,16 +196,16 @@ namespace EpIA
                         cromossomoarray[sorteado] = '1';
                     }
 
-                    selecionadaosy.RemoveAt(i);
-                    selecionadaosy.Add(cromossomoarray.ToString());
+                    selecionadaosy[i]["biny"] = new string(cromossomoarray);
                 }
             }
         }
 
         private void CrossOver()
         {
-            filhos1 = new List<String>();
-            filhos2 = new List<String>();
+
+            selecionadaosx = dt.Select("selecionadox = 1");
+            selecionadaosy = dt.Select("selecionadoy = 1");
 
             int chanceCruzamento = 70;
             var rand = new Random();
@@ -220,18 +219,18 @@ namespace EpIA
                     int pontoDivisao = rand.Next(1, 10);
 
                     //Pega a segunda parte 
-                    string parte2_x = selecionadaosx[i].Substring(pontoDivisao, 10 - pontoDivisao);
-                    string parte2_x1 = selecionadaosx[i+1].Substring(pontoDivisao, 10 - pontoDivisao);
+                    string parte2_x = selecionadaosx[i]["binx"].ToString().Substring(pontoDivisao, 10 - pontoDivisao);
+                    string parte2_x1 = selecionadaosx[i+1]["binx"].ToString().Substring(pontoDivisao, 10 - pontoDivisao);
 
-                    string parte2_y = selecionadaosy[i].Substring(pontoDivisao, 10 - pontoDivisao);
-                    string parte2_y1 = selecionadaosy[i+1].Substring(pontoDivisao, 10 - pontoDivisao);
+                    string parte2_y = selecionadaosy[i]["biny"].ToString().Substring(pontoDivisao, 10 - pontoDivisao);
+                    string parte2_y1 = selecionadaosy[i+1]["biny"].ToString().Substring(pontoDivisao, 10 - pontoDivisao);
 
                     // coloca nos lugares
-                    selecionadaosx[i] = selecionadaosx[i].Substring(0, pontoDivisao) + parte2_x1;
-                    selecionadaosx[i+1] = selecionadaosx[i+1].Substring(0, pontoDivisao) + parte2_x;
+                    selecionadaosx[i]["binx"] = selecionadaosx[i]["binx"].ToString().Substring(0, pontoDivisao) + parte2_x1;
+                    selecionadaosx[i+1]["binx"] = selecionadaosx[i+1]["binx"].ToString().Substring(0, pontoDivisao) + parte2_x;
 
-                    selecionadaosy[i] = selecionadaosy[i].Substring(0, pontoDivisao) + parte2_y;
-                    selecionadaosy[i + 1] = selecionadaosy[i + 1].Substring(0, pontoDivisao) + parte2_y1;
+                    selecionadaosy[i]["biny"] = selecionadaosy[i]["biny"].ToString().Substring(0, pontoDivisao) + parte2_y;
+                    selecionadaosy[i + 1]["biny"] = selecionadaosy[i + 1]["biny"].ToString().Substring(0, pontoDivisao) + parte2_y1;
                 }
 
             }
@@ -240,7 +239,8 @@ namespace EpIA
         private void SelecaoTorneio()
         {
 
-            while (selecionadaosx.Count() < 4 || selecionadaosy.Count() < 4)
+
+            while (selecionadaosx == null || selecionadaosx.Count() < 4 || selecionadaosy.Count() < 4)
             {
                 selecionadaosx = dt.Select("selecionadox = 1");
                 selecionadaosy = dt.Select("selecionadoy = 1");
@@ -255,24 +255,30 @@ namespace EpIA
                     sorteadosx.Add((string)dt.Rows[sorteadox]["binx"]);
                     sorteadosy.Add((string)dt.Rows[sorteadoy]["biny"]);
                 }
-                if (!ContainsDataRow(selecionadaosx, sorteadosx.Max()) && selecionadaosx.Count() < 4)
+                if (!ContainsDataRow(true,sorteadosx.Max()) && selecionadaosx.Count() < 4)
                 {
-                    dt.Select("binx = '" + sorteadosx.Max() + "'").FirstOrDefault()["selecionado"] = 1;
+                    dt.Select("binx = '" + sorteadosx.Max() + "'").FirstOrDefault()["selecionadox"] = 1;
                 }
 
-                if (!ContainsDataRow(selecionadaosy, sorteadosy.Max()) && selecionadaosy.Count() < 4)
+                if (!ContainsDataRow(false,sorteadosy.Max()) && selecionadaosy.Count() < 4)
                 {
-                    dt.Select("binx = '" + sorteadosx.Max() + "'").FirstOrDefault()["selecionado"] = 1;
+                    dt.Select("biny = '" + sorteadosy.Max() + "'").FirstOrDefault()["selecionadoy"] = 1;
                 }
 
             } 
-
-           
         }
 
-        private bool ContainsDataRow(DataRow[] selecionadaosy, string v)
+        private bool ContainsDataRow(bool x, string max)
         {
-            throw new NotImplementedException();
+            if (x)
+            {
+                foreach (DataRow row in selecionadaosx)if ((String)row["binx"] == max) return true;    
+            }
+            else
+            {
+                foreach (DataRow row in selecionadaosx) if ((String)row["biny"] == max) return true;
+            }
+            return false;
         }
 
         private void bintodec(string xString, string yString)
