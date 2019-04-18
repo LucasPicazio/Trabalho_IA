@@ -30,7 +30,7 @@ namespace EpIA
 		{
 
 			InitializeComponent();
-            DataColumn binx = new DataColumn("binx");//TODO: Mudar de dt para Lista
+            DataColumn binx = new DataColumn("binx");
             DataColumn biny = new DataColumn("biny");
             DataColumn fitness = new DataColumn("fitness");
             DataColumn selecionadox = new DataColumn("selecionadox");
@@ -42,7 +42,7 @@ namespace EpIA
             dt.Columns.Add(selecionadox);
             dt.Columns.Add(selecionadoy);
 
-            DataColumn generation = new DataColumn("generation");//TODO: Mudar de dt para Lista
+            DataColumn generation = new DataColumn("generation");
             DataColumn max = new DataColumn("max");
             DataColumn fitness2 = new DataColumn("fitness");
             fitness2.DataType = typeof(double);
@@ -103,7 +103,7 @@ namespace EpIA
             chart1.Series["Series1"].YValueMembers = "fitness";
             chart1.Series["Series1"].ChartType = SeriesChartType.Line;
 
-            int Geracoes = 20000;
+            int Geracoes = 1;
             for (int i = 0; i < Geracoes; i++)
             {
                 DataRow row = chartdt.NewRow();
@@ -116,6 +116,7 @@ namespace EpIA
                     string yString = (string)dr["biny"];
                     bintodec(xString, yString);
                     Rodar_e_fitness();
+
                 }
 
 
@@ -130,7 +131,6 @@ namespace EpIA
                 ListtoDataTable();
 
                 dataGridView2.DataSource = dt;
-
                 chart1.DataSource = chartdt;
                 dataGridView1.DataSource = chartdt;
             }
@@ -140,7 +140,8 @@ namespace EpIA
         {
             for (int i = 0; i < 4; i++)
             {
-
+                dt.Rows[i]["binx"] = selecionadaosx[i]["binx"];
+                dt.Rows[i]["biny"] = selecionadaosx[i]["biny"];
             }
         }
 
@@ -229,8 +230,8 @@ namespace EpIA
                     selecionadaosx[i]["binx"] = selecionadaosx[i]["binx"].ToString().Substring(0, pontoDivisao) + parte2_x1;
                     selecionadaosx[i+1]["binx"] = selecionadaosx[i+1]["binx"].ToString().Substring(0, pontoDivisao) + parte2_x;
 
-                    selecionadaosy[i]["biny"] = selecionadaosy[i]["biny"].ToString().Substring(0, pontoDivisao) + parte2_y;
-                    selecionadaosy[i + 1]["biny"] = selecionadaosy[i + 1]["biny"].ToString().Substring(0, pontoDivisao) + parte2_y1;
+                    selecionadaosy[i]["biny"] = selecionadaosy[i]["biny"].ToString().Substring(0, pontoDivisao) + parte2_y1;
+                    selecionadaosy[i + 1]["biny"] = selecionadaosy[i + 1]["biny"].ToString().Substring(0, pontoDivisao) + parte2_y;
                 }
 
             }
@@ -238,7 +239,9 @@ namespace EpIA
 
         private void SelecaoTorneio()
         {
-
+            selecionadaosx = null;
+            selecionadaosy = null;
+            LimpaSelecionados();
 
             while (selecionadaosx == null || selecionadaosx.Count() < 4 || selecionadaosy.Count() < 4)
             {
@@ -268,6 +271,15 @@ namespace EpIA
             } 
         }
 
+        private void LimpaSelecionados()
+        {
+            foreach (var x in dt.Select("selecionadoy = 1 OR selecionadox = 1"))
+            {
+                x["selecionadox"] = null;
+                x["selecionadoy"] = null;
+            }
+        }
+
         private bool ContainsDataRow(bool x, string max)
         {
             if (x)
@@ -276,7 +288,7 @@ namespace EpIA
             }
             else
             {
-                foreach (DataRow row in selecionadaosx) if ((String)row["biny"] == max) return true;
+                foreach (DataRow row in selecionadaosy) if ((String)row["biny"] == max) return true;
             }
             return false;
         }
