@@ -46,6 +46,7 @@ namespace EpIA
             DataColumn max = new DataColumn("max");
             DataColumn fitness2 = new DataColumn("fitness");
             fitness2.DataType = typeof(double);
+            max.DataType = typeof(double);
             chartdt.Columns.Add(generation);
             chartdt.Columns.Add(max);
             chartdt.Columns.Add(fitness2);
@@ -99,9 +100,14 @@ namespace EpIA
 
         private void Button1_Click(object sender, EventArgs e)
         {
-            chart1.Series["Series1"].XValueMember = "generation";
-            chart1.Series["Series1"].YValueMembers = "fitness";
-            chart1.Series["Series1"].ChartType = SeriesChartType.Line;
+            chart1.Series["Media"].XValueMember = "generation";
+            chart1.Series["Media"].YValueMembers = "fitness";
+            chart1.Series["Media"].ChartType = SeriesChartType.Line;
+
+            chart1.Series["Max"].XValueMember = "generation";
+            chart1.Series["Max"].YValueMembers = "max";
+            chart1.Series["Max"].ChartType = SeriesChartType.Line;
+            chart1.Series["Max"].BorderDashStyle = ChartDashStyle.DashDot;
 
             int Geracoes = 1;
             for (int i = 0; i < Geracoes; i++)
@@ -119,9 +125,10 @@ namespace EpIA
 
                 }
 
-
+                TruncaFitness();
                 SelecaoTorneio(); // Seleciona da table e coloca nos selecionados
-                CrossOver(); // Faz crossover dos selecionados
+                // SinglePointCrossOver(); // Faz crossover dos selecionados
+                UniformCrossover();
                 Mutacao(); // Muta os selecionados
                 MediaFitness();
                 row["fitness"] = mediafitness;
@@ -136,14 +143,29 @@ namespace EpIA
             }
         }
 
+        
+
+        private void TruncaFitness()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                dt.Rows[i]["fitness"] = Math.Truncate((double)dt.Rows[i]["fitness"] * 100000000) /100000000;
+                
+            }
+        }
+
         private void ListtoDataTable()
         {
             for (int i = 0; i < 4; i++)
             {
-                dt.Rows[i]["binx"] = selecionadaosx[i]["binx"];
-                dt.Rows[i]["biny"] = selecionadaosx[i]["biny"];
+                var x = selecionadaosx[i]["fitness"].ToString();
+                dr = dt.Select("fitness = " + selecionadaosx[i]["fitness"].ToString().Replace(',', '.')).FirstOrDefault();
+                dr["binx"] = selecionadaosx[i]["binx"];
+                dr["biny"] = selecionadaosx[i]["biny"];
             }
+                
         }
+        
 
         private void Melhor()
         {
@@ -162,7 +184,7 @@ namespace EpIA
             for (int i = 0; i < selecionadaosx.Count(); i++)
             {
                 Random rand = new Random();
-                if (rand.Next(0,100) < probabilidadeMutacao )
+                if (rand.Next(0,1000) < probabilidadeMutacao )
                 {
                     countMutacao++;
                     var cromossomoarray = selecionadaosx[i]["binx"].ToString().ToCharArray();
@@ -183,7 +205,7 @@ namespace EpIA
             for (int i = 0; i < selecionadaosy.Count(); i++)
             {
                 Random rand = new Random();
-                if (rand.Next(0, 100) < probabilidadeMutacao)
+                if (rand.Next(0, 1000) < probabilidadeMutacao)
                 {
                     var cromossomoarray = selecionadaosy[i]["biny"].ToString().ToCharArray();
                     int sorteado = rand.Next(0, 4);
@@ -202,13 +224,13 @@ namespace EpIA
             }
         }
 
-        private void CrossOver()
+        private void SinglePointCrossOver()
         {
 
             selecionadaosx = dt.Select("selecionadox = 1");
             selecionadaosy = dt.Select("selecionadoy = 1");
 
-            int chanceCruzamento = 70;
+            int chanceCruzamento = 50;
             var rand = new Random();
 
             for (int i = 0; i < 2; i++)
@@ -218,7 +240,7 @@ namespace EpIA
                 if (cruza < chanceCruzamento)
                 {
                     int pontoDivisao = rand.Next(1, 10);
-
+                    if (i == 1) i++;
                     //Pega a segunda parte 
                     string parte2_x = selecionadaosx[i]["binx"].ToString().Substring(pontoDivisao, 10 - pontoDivisao);
                     string parte2_x1 = selecionadaosx[i+1]["binx"].ToString().Substring(pontoDivisao, 10 - pontoDivisao);
@@ -237,6 +259,44 @@ namespace EpIA
             }
         }
 
+        private void UniformCrossover()
+        {
+            selecionadaosx = dt.Select("selecionadox = 1");
+            selecionadaosy = dt.Select("selecionadoy = 1");
+
+            int chanceCruzamento = 50;
+            var rand = new Random();
+
+            for (int i = 0; i < 2; i++)
+            {
+                if (i == 1) i++;
+                for (int j = 0; j < 5; j++)
+                {
+                    if (rand.Next(0, 100) < chanceCruzamento)
+                    {
+                        var arr = selecionadaosx[i]["binx"].ToString().ToCharArray();
+                        arr[j] = selecionadaosx[i + 1]["binx"].ToString().ToCharArray()[j];
+
+                        var arr2 = selecionadaosx[i+1]["binx"].ToString().ToCharArray();
+                        arr2[j] = selecionadaosx[i]["binx"].ToString().ToCharArray()[j];
+
+                        selecionadaosx[i]["binx"] = new string(arr);
+                        selecionadaosx[i+1]["binx"] = new string(arr2);
+
+                        arr = selecionadaosy[i]["biny"].ToString().ToCharArray();
+                        arr[j] = selecionadaosy[i + 1]["biny"].ToString().ToCharArray()[j];
+
+                        arr2 = selecionadaosy[i + 1]["biny"].ToString().ToCharArray();
+                        arr2[j] = selecionadaosy[i]["biny"].ToString().ToCharArray()[j];
+
+                        selecionadaosy[i]["biny"] = new string(arr);
+                        selecionadaosy[i + 1]["biny"] = new string(arr2);
+
+                    }
+                }
+            }
+        }
+
         private void SelecaoTorneio()
         {
             selecionadaosx = null;
@@ -249,23 +309,27 @@ namespace EpIA
                 selecionadaosy = dt.Select("selecionadoy = 1");
 
                 var rand = new Random();
-                var sorteadosx = new List<String>();
-                var sorteadosy = new List<String>();
+                var sorteadosx = new List<double>();
+                var sorteadosy = new List<double>();
                 for (int i = 0; i < 3; i++)
                 {
-                    int sorteadox = rand.Next(0, 9);
-                    int sorteadoy = rand.Next(0, 9);
-                    sorteadosx.Add((string)dt.Rows[sorteadox]["binx"]);
-                    sorteadosy.Add((string)dt.Rows[sorteadoy]["biny"]);
+                    int sorteadox = rand.Next(0, 10);
+                    int sorteadoy = rand.Next(0,10);
+                    sorteadosx.Add((double)dt.Rows[sorteadox]["fitness"]);
+                    sorteadosy.Add((double)dt.Rows[sorteadoy]["fitness"]);
                 }
-                if (!ContainsDataRow(true,sorteadosx.Max()) && selecionadaosx.Count() < 4)
+                if (!ContainsDataRow(true, sorteadosx.Max()) && selecionadaosx.Count() < 4)
+                    
                 {
-                    dt.Select("binx = '" + sorteadosx.Max() + "'").FirstOrDefault()["selecionadox"] = 1;
+                    var x = string.Concat("fitness = ", sorteadosx.Max().ToString().Replace(',','.'));
+                    dt.Select(x).FirstOrDefault()["selecionadox"] = 1; ;
                 }
 
                 if (!ContainsDataRow(false,sorteadosy.Max()) && selecionadaosy.Count() < 4)
                 {
-                    dt.Select("biny = '" + sorteadosy.Max() + "'").FirstOrDefault()["selecionadoy"] = 1;
+
+                    var x = string.Concat("fitness = ", sorteadosy.Max().ToString().Replace(',', '.'));
+                    dt.Select(x).FirstOrDefault()["selecionadoy"] = 1; ;
                 }
 
             } 
@@ -280,15 +344,15 @@ namespace EpIA
             }
         }
 
-        private bool ContainsDataRow(bool x, string max)
+        private bool ContainsDataRow(bool x, double max)
         {
             if (x)
             {
-                foreach (DataRow row in selecionadaosx)if ((String)row["binx"] == max) return true;    
+                foreach (DataRow row in selecionadaosx)if ((double)row["fitness"] == max) return true;    
             }
             else
             {
-                foreach (DataRow row in selecionadaosy) if ((String)row["biny"] == max) return true;
+                foreach (DataRow row in selecionadaosy) if ((double)row["fitness"] == max) return true;
             }
             return false;
         }
