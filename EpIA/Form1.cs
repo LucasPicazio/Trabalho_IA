@@ -12,10 +12,11 @@ namespace EpIA
 	{
         DataTable chartdt = new DataTable();
         DataTable dt = new DataTable();
+        DataTable dtantigo = new DataTable();
         DataRow dr;
         double x;
 		double y;
-
+        int pares;
         double fitness;
         double probabilidadeMutacao = 5;
         double mediafitness;
@@ -93,6 +94,10 @@ namespace EpIA
             dr["binx"] = "0011001110";
             dr["biny"] = "1010110011";
             dt.Rows.Add(dr);
+            dr = dt.NewRow();
+            dr["binx"] = "1111001111";
+            dr["biny"] = "1110110111";
+            dt.Rows.Add(dr);
 
             #endregion
 
@@ -108,14 +113,18 @@ namespace EpIA
             chart1.Series["Max"].YValueMembers = "max";
             chart1.Series["Max"].ChartType = SeriesChartType.Line;
             chart1.Series["Max"].BorderDashStyle = ChartDashStyle.DashDot;
+            DefinePares();
 
             int Geracoes = 1;
             for (int i = 0; i < Geracoes; i++)
             {
                 DataRow row = chartdt.NewRow();
                 row["generation"] = i;
+                dtantigo = dt.Copy();
 
-                for (int j = 0; j < 10; j++)
+                
+
+                for (int j = 0; j < dt.Rows.Count; j++)
                 {
                     dr = dt.Rows[j];
                     string xString = (string)dr["binx"];
@@ -125,7 +134,7 @@ namespace EpIA
 
                 }
 
-                TruncaFitness();
+                
                 SelecaoTorneio(); // Seleciona da table e coloca nos selecionados
                 // SinglePointCrossOver(); // Faz crossover dos selecionados
                 UniformCrossover();
@@ -137,17 +146,49 @@ namespace EpIA
                 chartdt.Rows.Add(row);
                 ListtoDataTable();
 
+                if (dtantigo.Rows.Count != 0)
+                    Pintadiferencas();
+
                 dataGridView2.DataSource = dt;
                 chart1.DataSource = chartdt;
                 dataGridView1.DataSource = chartdt;
             }
         }
 
-        
+        private void Pintadiferencas()
+        {
+            foreach (DataGridViewRow row in dataGridView2.Rows)
+            {
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    if(cell.Value != null)
+                    {
+                    cell.Style.BackColor = System.Drawing.Color.White;
+                    if (dtantigo.Rows[cell.RowIndex][cell.ColumnIndex] != dt.Rows[cell.RowIndex][cell.ColumnIndex])
+                    {
+                        cell.Style.BackColor = System.Drawing.Color.Yellow;
+                    }
+                    }
+                }
+            }
+        }
+
+        private void DefinePares()
+        {
+            if (Math.Floor(dt.Rows.Count * 0.4) % 2 == 0)
+            {
+                pares = (int)(Math.Floor(dt.Rows.Count * 0.4));
+            }
+            else
+            {
+                pares = (int)(Math.Ceiling(dt.Rows.Count * 0.4));
+            }
+
+        }
 
         private void TruncaFitness()
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < dt.Rows.Count; i++)
             {
                 dt.Rows[i]["fitness"] = Math.Truncate((double)dt.Rows[i]["fitness"] * 100000000) /100000000;
                 
@@ -175,7 +216,7 @@ namespace EpIA
         private void MediaFitness()
         {
             double soma = dt.AsEnumerable().Select(r => r.Field<double>("fitness")).Sum();
-            mediafitness = soma / 10;
+            mediafitness = soma / dt.Rows.Count;
         }
 
         private void Mutacao()
@@ -267,33 +308,39 @@ namespace EpIA
             int chanceCruzamento = 50;
             var rand = new Random();
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < pares / 2; i = i+2)
             {
-                if (i == 1) i++;
-                for (int j = 0; j < 5; j++)
+
+                for (int i2 = 1; i2 < pares / 2; i2 = i2+2)
                 {
-                    if (rand.Next(0, 100) < chanceCruzamento)
+
+
+                    for (int j = 0; j < 5; j++)
                     {
-                        var arr = selecionadaosx[i]["binx"].ToString().ToCharArray();
-                        arr[j] = selecionadaosx[i + 1]["binx"].ToString().ToCharArray()[j];
+                        if (rand.Next(0, 100) < chanceCruzamento)
+                        {
+                            var arr = selecionadaosx[i]["binx"].ToString().ToCharArray();
+                            arr[j] = selecionadaosx[i + 1]["binx"].ToString().ToCharArray()[j];
 
-                        var arr2 = selecionadaosx[i+1]["binx"].ToString().ToCharArray();
-                        arr2[j] = selecionadaosx[i]["binx"].ToString().ToCharArray()[j];
+                            var arr2 = selecionadaosx[i + 1]["binx"].ToString().ToCharArray();
+                            arr2[j] = selecionadaosx[i]["binx"].ToString().ToCharArray()[j];
 
-                        selecionadaosx[i]["binx"] = new string(arr);
-                        selecionadaosx[i+1]["binx"] = new string(arr2);
+                            selecionadaosx[i]["binx"] = new string(arr);
+                            selecionadaosx[i + 1]["binx"] = new string(arr2);
 
-                        arr = selecionadaosy[i]["biny"].ToString().ToCharArray();
-                        arr[j] = selecionadaosy[i + 1]["biny"].ToString().ToCharArray()[j];
+                            arr = selecionadaosy[i]["biny"].ToString().ToCharArray();
+                            arr[j] = selecionadaosy[i + 1]["biny"].ToString().ToCharArray()[j];
 
-                        arr2 = selecionadaosy[i + 1]["biny"].ToString().ToCharArray();
-                        arr2[j] = selecionadaosy[i]["biny"].ToString().ToCharArray()[j];
+                            arr2 = selecionadaosy[i + 1]["biny"].ToString().ToCharArray();
+                            arr2[j] = selecionadaosy[i]["biny"].ToString().ToCharArray()[j];
 
-                        selecionadaosy[i]["biny"] = new string(arr);
-                        selecionadaosy[i + 1]["biny"] = new string(arr2);
+                            selecionadaosy[i]["biny"] = new string(arr);
+                            selecionadaosy[i + 1]["biny"] = new string(arr2);
 
+                        }
                     }
                 }
+
             }
         }
 
@@ -303,7 +350,10 @@ namespace EpIA
             selecionadaosy = null;
             LimpaSelecionados();
 
-            while (selecionadaosx == null || selecionadaosx.Count() < 4 || selecionadaosy.Count() < 4)
+            
+            
+            // Seleciona 40% da populacao
+            while (selecionadaosx == null || selecionadaosx.Count() < pares)
             {
                 selecionadaosx = dt.Select("selecionadox = 1");
                 selecionadaosy = dt.Select("selecionadoy = 1");
@@ -313,25 +363,19 @@ namespace EpIA
                 var sorteadosy = new List<double>();
                 for (int i = 0; i < 3; i++)
                 {
-                    int sorteadox = rand.Next(0, 10);
-                    int sorteadoy = rand.Next(0,10);
+                    int sorteadox = rand.Next(0, dt.Rows.Count);
+                    int sorteadoy = rand.Next(0, dt.Rows.Count);
                     sorteadosx.Add((double)dt.Rows[sorteadox]["fitness"]);
                     sorteadosy.Add((double)dt.Rows[sorteadoy]["fitness"]);
                 }
-                if (!ContainsDataRow(true, sorteadosx.Max()) && selecionadaosx.Count() < 4)
-                    
-                {
+                
+                //Permite repetidos
                     var x = string.Concat("fitness = ", sorteadosx.Max().ToString().Replace(',','.'));
                     dt.Select(x).FirstOrDefault()["selecionadox"] = 1; ;
-                }
-
-                if (!ContainsDataRow(false,sorteadosy.Max()) && selecionadaosy.Count() < 4)
-                {
-
-                    var x = string.Concat("fitness = ", sorteadosy.Max().ToString().Replace(',', '.'));
                     dt.Select(x).FirstOrDefault()["selecionadoy"] = 1; ;
-                }
 
+                    
+                
             } 
         }
 
@@ -368,8 +412,6 @@ namespace EpIA
 
 			x = Math.Round(x, 2);
 			y = Math.Round(y, 2);
-            
-
 
 
         }
@@ -379,8 +421,8 @@ namespace EpIA
             
                 var result = 20 + Math.Pow(x, 2) + Math.Pow(y, 2) - 10 * (Math.Cos(2 * Math.PI * x) + Math.Cos(2 * Math.PI * y));
                 fitness = 1 / result;
-                dr["fitness"] = fitness;
-                
+                dr["fitness"] = Math.Truncate(fitness * 100000000) / 100000000;
+
         }
     }
 }
