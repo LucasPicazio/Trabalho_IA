@@ -95,8 +95,58 @@ namespace EpIA
             dr["biny"] = "1010110011";
             dt.Rows.Add(dr);
             dr = dt.NewRow();
-            dr["binx"] = "1111001111";
-            dr["biny"] = "1110110111";
+            dr["binx"] = "1111001011";
+            dr["biny"] = "1110011110";
+            dt.Rows.Add(dr);
+
+            dr = dt.NewRow();
+            dr["binx"] = "1011110111";
+            dr["biny"] = "1110111111";
+            dt.Rows.Add(dr);
+
+            dr = dt.NewRow();
+            dr["binx"] = "0110001010";
+            dr["biny"] = "1000000001";
+            dt.Rows.Add(dr);
+
+            dr = dt.NewRow();
+            dr["binx"] = "1111111011";
+            dr["biny"] = "1000110011";
+            dt.Rows.Add(dr);
+
+            dr = dt.NewRow();
+            dr["binx"] = "1101000011";
+            dr["biny"] = "1001111101";
+            dt.Rows.Add(dr);
+
+            dr = dt.NewRow();
+            dr["binx"] = "1111111111";
+            dr["biny"] = "1110011001";
+            dt.Rows.Add(dr);
+
+            dr = dt.NewRow();
+            dr["binx"] = "0000000000";
+            dr["biny"] = "0000000000";
+            dt.Rows.Add(dr);
+
+            dr = dt.NewRow();
+            dr["binx"] = "0000000001";
+            dr["biny"] = "0000000111";
+            dt.Rows.Add(dr);
+
+            dr = dt.NewRow();
+            dr["binx"] = "0000000111";
+            dr["biny"] = "0000001010";
+            dt.Rows.Add(dr);
+
+            dr = dt.NewRow();
+            dr["binx"] = "0000100010";
+            dr["biny"] = "0000001010";
+            dt.Rows.Add(dr);
+
+            dr = dt.NewRow();
+            dr["binx"] = "0001010101";
+            dr["biny"] = "0110001001";
             dt.Rows.Add(dr);
 
             #endregion
@@ -136,8 +186,8 @@ namespace EpIA
 
                 
                 SelecaoTorneio(); // Seleciona da table e coloca nos selecionados
-                // SinglePointCrossOver(); // Faz crossover dos selecionados
-                UniformCrossover();
+                SinglePointCrossOver(); // Faz crossover dos selecionados
+                //UniformCrossover();
                 Mutacao(); // Muta os selecionados
                 MediaFitness();
                 row["fitness"] = mediafitness;
@@ -197,12 +247,12 @@ namespace EpIA
 
         private void ListtoDataTable()
         {
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < selecionadaosx.Count(); i++)
             {
                 var x = selecionadaosx[i]["fitness"].ToString();
                 dr = dt.Select("fitness = " + selecionadaosx[i]["fitness"].ToString().Replace(',', '.')).FirstOrDefault();
                 dr["binx"] = selecionadaosx[i]["binx"];
-                dr["biny"] = selecionadaosx[i]["biny"];
+                dr["biny"] = selecionadaosy[i]["biny"];
             }
                 
         }
@@ -229,7 +279,7 @@ namespace EpIA
                 {
                     countMutacao++;
                     var cromossomoarray = selecionadaosx[i]["binx"].ToString().ToCharArray();
-                    int sorteado = rand.Next(0, 4);
+                    int sorteado = rand.Next(0, 5);
 
                     if (cromossomoarray[sorteado] == '1')
                     {
@@ -249,7 +299,7 @@ namespace EpIA
                 if (rand.Next(0, 1000) < probabilidadeMutacao)
                 {
                     var cromossomoarray = selecionadaosy[i]["biny"].ToString().ToCharArray();
-                    int sorteado = rand.Next(0, 4);
+                    int sorteado = rand.Next(0, 5);
 
                     if (cromossomoarray[sorteado] == '1')
                     {
@@ -271,30 +321,30 @@ namespace EpIA
             selecionadaosx = dt.Select("selecionadox = 1");
             selecionadaosy = dt.Select("selecionadoy = 1");
 
-            int chanceCruzamento = 50;
+            int chanceCruzamento = 70;
             var rand = new Random();
+            int i2 = 1;
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < selecionadaosx.Count(); i+=2)
             {
                 int cruza = rand.Next(1, 100);
 
                 if (cruza < chanceCruzamento)
                 {
                     int pontoDivisao = rand.Next(1, 10);
-                    if (i == 1) i++;
                     //Pega a segunda parte 
                     string parte2_x = selecionadaosx[i]["binx"].ToString().Substring(pontoDivisao, 10 - pontoDivisao);
-                    string parte2_x1 = selecionadaosx[i+1]["binx"].ToString().Substring(pontoDivisao, 10 - pontoDivisao);
+                    string parte2_x1 = selecionadaosx[i2]["binx"].ToString().Substring(pontoDivisao, 10 - pontoDivisao);
 
                     string parte2_y = selecionadaosy[i]["biny"].ToString().Substring(pontoDivisao, 10 - pontoDivisao);
-                    string parte2_y1 = selecionadaosy[i+1]["biny"].ToString().Substring(pontoDivisao, 10 - pontoDivisao);
+                    string parte2_y1 = selecionadaosy[i2]["biny"].ToString().Substring(pontoDivisao, 10 - pontoDivisao);
 
                     // coloca nos lugares
                     selecionadaosx[i]["binx"] = selecionadaosx[i]["binx"].ToString().Substring(0, pontoDivisao) + parte2_x1;
-                    selecionadaosx[i+1]["binx"] = selecionadaosx[i+1]["binx"].ToString().Substring(0, pontoDivisao) + parte2_x;
+                    selecionadaosx[i2]["binx"] = selecionadaosx[i2]["binx"].ToString().Substring(0, pontoDivisao) + parte2_x;
 
                     selecionadaosy[i]["biny"] = selecionadaosy[i]["biny"].ToString().Substring(0, pontoDivisao) + parte2_y1;
-                    selecionadaosy[i + 1]["biny"] = selecionadaosy[i + 1]["biny"].ToString().Substring(0, pontoDivisao) + parte2_y;
+                    selecionadaosy[i2]["biny"] = selecionadaosy[i2]["biny"].ToString().Substring(0, pontoDivisao) + parte2_y;
                 }
 
             }
@@ -307,39 +357,52 @@ namespace EpIA
 
             int chanceCruzamento = 50;
             var rand = new Random();
+            int i2 = 1;
 
-            for (int i = 0; i < pares / 2; i = i+2)
+            for (int i = 0; i < selecionadaosx.Count(); i = i+2)
             {
+                
+                    Console.WriteLine(i);
+                    Console.WriteLine(i2);
 
-                for (int i2 = 1; i2 < pares / 2; i2 = i2+2)
-                {
 
-
-                    for (int j = 0; j < 5; j++)
+                    for (int j = 0; j < 10; j++)
                     {
                         if (rand.Next(0, 100) < chanceCruzamento)
                         {
                             var arr = selecionadaosx[i]["binx"].ToString().ToCharArray();
-                            arr[j] = selecionadaosx[i + 1]["binx"].ToString().ToCharArray()[j];
+                            arr[j] = selecionadaosx[i2]["binx"].ToString().ToCharArray()[j];
 
-                            var arr2 = selecionadaosx[i + 1]["binx"].ToString().ToCharArray();
+                            if (arr.Count() != 10)
+                            {
+
+                                Console.WriteLine();
+                            }
+                            
+                            var arr2 = selecionadaosx[i2]["binx"].ToString().ToCharArray();
                             arr2[j] = selecionadaosx[i]["binx"].ToString().ToCharArray()[j];
 
+                            if (arr2.Count() != 10)
+                            {
+                                Console.WriteLine();
+                            }
+
                             selecionadaosx[i]["binx"] = new string(arr);
-                            selecionadaosx[i + 1]["binx"] = new string(arr2);
+                            selecionadaosx[i2]["binx"] = new string(arr2);
 
                             arr = selecionadaosy[i]["biny"].ToString().ToCharArray();
-                            arr[j] = selecionadaosy[i + 1]["biny"].ToString().ToCharArray()[j];
+                            arr[j] = selecionadaosy[i2]["biny"].ToString().ToCharArray()[j];
 
-                            arr2 = selecionadaosy[i + 1]["biny"].ToString().ToCharArray();
+                            arr2 = selecionadaosy[i2]["biny"].ToString().ToCharArray();
                             arr2[j] = selecionadaosy[i]["biny"].ToString().ToCharArray()[j];
 
                             selecionadaosy[i]["biny"] = new string(arr);
-                            selecionadaosy[i + 1]["biny"] = new string(arr2);
+                            selecionadaosy[i2]["biny"] = new string(arr2);
 
                         }
+                    
                     }
-                }
+                i2 = i2 + 2;
 
             }
         }
@@ -350,33 +413,33 @@ namespace EpIA
             selecionadaosy = null;
             LimpaSelecionados();
 
-            
-            
+
+
             // Seleciona 40% da populacao
-            while (selecionadaosx == null || selecionadaosx.Count() < pares)
+            for (int j = 0; selecionadaosx == null|| j < pares || selecionadaosx.Count() % 2 !=0; j++)
             {
+
+
                 selecionadaosx = dt.Select("selecionadox = 1");
                 selecionadaosy = dt.Select("selecionadoy = 1");
 
                 var rand = new Random();
                 var sorteadosx = new List<double>();
-                var sorteadosy = new List<double>();
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < pares/4; i++)
                 {
                     int sorteadox = rand.Next(0, dt.Rows.Count);
-                    int sorteadoy = rand.Next(0, dt.Rows.Count);
                     sorteadosx.Add((double)dt.Rows[sorteadox]["fitness"]);
-                    sorteadosy.Add((double)dt.Rows[sorteadoy]["fitness"]);
-                }
-                
-                //Permite repetidos
-                    var x = string.Concat("fitness = ", sorteadosx.Max().ToString().Replace(',','.'));
-                    dt.Select(x).FirstOrDefault()["selecionadox"] = 1; ;
-                    dt.Select(x).FirstOrDefault()["selecionadoy"] = 1; ;
 
-                    
-                
-            } 
+                }
+
+                //Permite repetidos
+                var x = string.Concat("fitness = ", sorteadosx.Max().ToString().Replace(',', '.'));
+                dt.Select(x).FirstOrDefault()["selecionadox"] = 1; ;
+                dt.Select(x).FirstOrDefault()["selecionadoy"] = 1; ;
+
+
+            }  
+             
         }
 
         private void LimpaSelecionados()
